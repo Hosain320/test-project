@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hopewell — Every act of kindness builds a brighter future</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #121212;
+    --bg-soft: #1b1b1b;
+    --card: #1e1e1e;
+    --line: #2c2c2c;
+    --ink: #f5f4f2;
+    --ink-dim: #a3a29e;
+    --cream: #ece9e2;
+    --accent: #e7e4dc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+
+  /* header */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(18,18,18,.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 24px; max-width:1120px; margin:0 auto;
+  }
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-mark{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--cream); display:flex;align-items:center;justify-content:center;
+    color:#121212; flex-shrink:0;
+  }
+  .logo-name{font-size:1.3rem; font-weight:700; letter-spacing:.2px;}
+  nav.desktop-nav{display:none; gap:32px; font-size:.95rem; color:var(--ink-dim);}
+  nav.desktop-nav a:hover{color:var(--ink);}
+  .cta-donate{
+    display:none;
+    background:var(--cream); color:#121212; padding:10px 22px;
+    border-radius:999px; font-weight:600; font-size:.9rem;
+  }
+  .burger{
+    background:none;border:1px solid var(--line);color:var(--ink);
+    width:42px;height:42px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  @media(min-width:860px){
+    nav.desktop-nav{display:flex;}
+    .cta-donate{display:inline-block;}
+    .burger{display:none;}
+  }
+
+  /* hero */
+  .hero{
+    position:relative; min-height:640px; display:flex; align-items:flex-end;
+    background-size:cover; background-position:center 30%;
+    background-image:
+      linear-gradient(180deg, rgba(18,18,18,.05) 0%, rgba(18,18,18,.55) 55%, rgba(18,18,18,.92) 100%),
+      url('https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1600&auto=format&fit=crop');
+  }
+  .hero-inner{padding:64px 24px 72px; max-width:760px;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--cream); color:#121212; font-size:.8rem; font-weight:600;
+    padding:7px 16px; border-radius:999px; margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#121212;display:inline-block;}
+  .hero h1{
+    font-size:2.4rem; line-height:1.12; font-weight:700; margin:0 0 20px;
+    max-width:640px;
+  }
+  .hero p{
+    color:var(--ink-dim); font-size:1.05rem; line-height:1.65; max-width:560px; margin:0 0 32px;
+  }
+  .hero-actions{display:flex; flex-direction:column; gap:14px; max-width:340px;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:15px 24px; border-radius:12px; font-weight:600; font-size:.98rem;
+    border:1px solid transparent; cursor:pointer; width:100%;
+  }
+  .btn-primary{background:var(--cream); color:#121212;}
+  .btn-ghost{background:rgba(255,255,255,.06); color:var(--ink); border-color:rgba(255,255,255,.25); backdrop-filter:blur(6px);}
+  @media(min-width:640px){
+    .hero h1{font-size:3.2rem;}
+    .hero-actions{flex-direction:row; max-width:none;}
+    .btn{width:auto;}
+  }
+
+  /* stats */
+  section.stats{padding:56px 0;}
+  .stats-card{
+    background:var(--card); border:1px solid var(--line); border-radius:24px;
+    padding:44px 32px; display:flex; flex-direction:column; gap:36px;
+  }
+  .stat{display:flex; align-items:center; gap:20px;}
+  .stat-icon{
+    width:56px;height:56px;border-radius:14px;background:#2a2a2a;
+    display:flex;align-items:center;justify-content:center; flex-shrink:0;
+  }
+  .stat .num{font-size:2rem; font-weight:800; line-height:1;}
+  .stat .label{color:var(--ink-dim); font-size:.95rem; margin-top:4px;}
+  @media(min-width:760px){
+    .stats-card{flex-direction:row; justify-content:space-between; align-items:center;}
+  }
+
+  /* projects */
+  section.projects{padding:20px 0 64px;}
+  .projects-head{max-width:640px; margin-bottom:40px;}
+  .projects-head h2{font-size:2rem; line-height:1.2; margin:0 0 16px;}
+  .projects-head p{color:var(--ink-dim); font-size:1.02rem; line-height:1.6;}
+  .project-grid{display:grid; grid-template-columns:1fr; gap:24px;}
+  @media(min-width:760px){ .project-grid{grid-template-columns:repeat(3,1fr);} }
+  .project-card{
+    background:var(--card); border:1px solid var(--line); border-radius:20px; overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .project-img{position:relative; height:220px; background-size:cover; background-position:center;}
+  .tag{
+    position:absolute; top:16px; left:16px; background:rgba(18,18,18,.85);
+    color:var(--ink); font-size:.78rem; font-weight:600; padding:6px 14px; border-radius:999px;
+  }
+  .project-body{padding:24px; display:flex; flex-direction:column; gap:14px; flex:1;}
+  .project-body h3{font-size:1.3rem; margin:0;}
+  .project-body p{color:var(--ink-dim); font-size:.92rem; line-height:1.55; margin:0; flex:1;}
+  .fund-row{display:flex; justify-content:space-between; font-size:.92rem; font-weight:700;}
+  .fund-row span.of{color:var(--ink-dim); font-weight:500;}
+  .bar{height:6px; border-radius:999px; background:#333; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--cream); border-radius:999px;}
+  .pct{color:var(--ink-dim); font-size:.85rem;}
+  .support-btn{
+    margin-top:6px; background:var(--cream); color:#121212; font-weight:600;
+    padding:13px; border-radius:10px; text-align:center; display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+
+  /* testimonial */
+  section.testimonial{background:var(--cream); color:#141414; padding:72px 0;}
+  .quote-wrap{max-width:720px; margin:0 auto; text-align:center;}
+  .quote-mark{font-size:3rem; font-family:'Playfair Display',serif; font-weight:800; color:#141414; line-height:1;}
+  .quote-wrap blockquote{
+    font-family:'Playfair Display',serif; font-size:1.5rem; line-height:1.5; font-weight:600;
+    margin:20px 0 28px;
+  }
+  .quote-name{font-weight:700; font-size:1rem;}
+  .quote-role{color:#5a5852; font-size:.9rem; margin-top:2px;}
+  .dots{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:32px;}
+  .dots button{width:9px;height:9px;border-radius:50%; border:none; background:#c9c5ba; cursor:pointer; padding:0;}
+  .dots button.active{width:26px; border-radius:999px; background:#141414;}
+  .arrow{
+    width:38px;height:38px;border-radius:50%;border:1px solid #cfcbc0; background:transparent;
+    display:flex;align-items:center;justify-content:center; cursor:pointer; color:#141414;
+  }
+
+  /* donate */
+  section.donate{padding:72px 0;}
+  .donate-card{
+    background:var(--card); border:1px solid var(--line); border-radius:28px;
+    padding:56px 28px; text-align:center; max-width:640px; margin:0 auto;
+  }
+  .donate-card .heart{margin-bottom:24px;}
+  .donate-card h2{font-size:2rem; line-height:1.25; margin:0 0 18px;}
+  .donate-card p{color:var(--ink-dim); font-size:1rem; line-height:1.6; max-width:460px; margin:0 auto 36px;}
+  .amounts{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:420px; margin:0 auto 20px;}
+  .amount{
+    background:#262626; border:1px solid var(--line); color:var(--ink); font-weight:700;
+    padding:16px; border-radius:12px; cursor:pointer; font-size:1rem;
+  }
+  .amount.selected{background:var(--cream); color:#121212; border-color:var(--cream);}
+  .donate-actions{display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap;}
+  .donate-now{background:var(--cream); color:#121212; font-weight:700; padding:16px 32px; border-radius:12px;}
+  .donate-link{font-weight:600; color:var(--ink);}
+
+  /* footer */
+  footer{border-top:1px solid var(--line); padding:64px 0 32px; background:var(--bg-soft);}
+  .footer-grid{display:grid; grid-template-columns:1fr; gap:44px;}
+  @media(min-width:760px){ .footer-grid{grid-template-columns:1.4fr 1fr 1fr 1.3fr;} }
+  .footer-about p{color:var(--ink-dim); font-size:.92rem; line-height:1.6; margin:16px 0 20px; max-width:280px;}
+  .socials{display:flex; gap:10px;}
+  .social-btn{
+    width:38px;height:38px;border-radius:10px; background:#242424; border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center; color:var(--ink-dim);
+  }
+  .footer-col h4{font-size:.95rem; font-weight:700; margin:0 0 18px;}
+  .footer-col a{display:block; color:var(--ink-dim); font-size:.92rem; margin-bottom:14px;}
+  .footer-col a:hover{color:var(--ink);}
+  .newsletter p{color:var(--ink-dim); font-size:.9rem; line-height:1.55; margin:0 0 16px;}
+  .subscribe-row{display:flex; flex-direction:column; gap:10px;}
+  .subscribe-row input{
+    background:#141414; border:1px solid var(--line); color:var(--ink);
+    padding:13px 16px; border-radius:10px; font-size:.9rem; font-family:inherit;
+  }
+  .subscribe-row button{
+    background:var(--cream); color:#121212; font-weight:700; border:none;
+    padding:13px; border-radius:10px; font-size:.9rem; cursor:pointer;
+  }
+  .contact-line{display:flex; align-items:center; gap:10px; color:var(--ink-dim); font-size:.88rem; margin-top:16px;}
+  .footer-bottom{
+    border-top:1px solid var(--line); margin-top:48px; padding-top:24px;
+    text-align:center; color:var(--ink-dim); font-size:.82rem; line-height:1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.8-10-9.3C.4 8.4 2 4.5 5.7 4c2-.3 3.9.6 5 2.2C11.9 4.6 13.8 3.7 15.7 4c3.7.5 5.3 4.4 3.7 7.7C19.5 16.2 12 21 12 21z"/></svg>
+      </div>
+      <span class="logo-name">Hopewell</span>
+    </div>
+    <nav class="desktop-nav">
+      <a href="#mission">Our Mission</a>
+      <a href="#projects">Projects</a>
+      <a href="#impact">Impact Reports</a>
+      <a href="#careers">Careers</a>
+    </nav>
+    <a href="#donate" class="cta-donate">Donate</a>
+    <button class="burger" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow"><span class="dot"></span> Changing lives since 2009</span>
+    <h1>Every act of kindness builds a brighter future.</h1>
+    <p>We partner with communities to deliver clean water, education, and hope where it's needed most. Your support today becomes someone's new beginning tomorrow.</p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn btn-primary">Explore Projects →</a>
+      <a href="#volunteer" class="btn btn-ghost">🤝 Become a Volunteer</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-card">
+      <div class="stat">
+        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="num">10k+</div><div class="label">Lives Impacted</div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div><div class="num">50+</div><div class="label">Active Projects</div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div><div class="num">20+</div><div class="label">Global Partners</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="projects" id="projects">
+  <div class="wrap">
+    <div class="projects-head">
+      <h2 class="serif">Projects changing lives right now</h2>
+      <p>Choose a cause close to your heart. Every contribution moves us closer to a world where no one is left behind.</p>
+    </div>
+    <div class="project-grid">
+
+      <div class="project-card">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1541252260730-0412e8e2108e?q=80&w=800&auto=format&fit=crop')">
+          <span class="tag">Water</span>
+        </div>
+        <div class="project-body">
+          <h3 class="serif">Clean Water Initiative</h3>
+          <p>Building wells and water systems to bring safe drinking water to remote villages.</p>
+          <div class="fund-row"><span>$68,000</span><span class="of">of $100,000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:68%"></div></div>
+          <div class="pct">68% funded</div>
+          <a href="#" class="support-btn">Support →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?q=80&w=800&auto=format&fit=crop')">
+          <span class="tag">Food</span>
+        </div>
+        <div class="project-body">
+          <h3 class="serif">Nourish Communities</h3>
+          <p>Delivering nutritious meals and sustainable farming to fight hunger at its root.</p>
+          <div class="fund-row"><span>$55,000</span><span class="of">of $60,000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:92%"></div></div>
+          <div class="pct">92% funded</div>
+          <a href="#" class="support-btn">Support →</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-img" style="background-image:url('https://images.unsplash.com/photo-1497486751825-1233686d5d80?q=80&w=800&auto=format&fit=crop')">
+          <span class="tag">Education</span>
+        </div>
+        <div class="project-body">
+          <h3 class="serif">Educate a Child</h3>
+          <p>Providing books, supplies, and teachers so every child can learn and thrive.</p>
+          <div class="fund-row"><span>$42,000</span><span class="of">of $75,000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:56%"></div></div>
+          <div class="pct">56% funded</div>
+          <a href="#" class="support-btn">Support →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial">
+  <div class="wrap">
+    <div class="quote-wrap">
+      <div class="quote-mark">"</div>
+      <blockquote id="quoteText">Before the well was built, I walked three hours each day for water. Now my children go to school instead. Hopewell gave us back our time and our hope.</blockquote>
+      <div class="quote-name" id="quoteName">Amara Okafor</div>
+      <div class="quote-role" id="quoteRole">Mother of three, Clean Water Initiative</div>
+      <div class="dots">
+        <button class="arrow" onclick="shiftQuote(-1)">‹</button>
+        <button class="active" data-i="0" onclick="setQuote(0)"></button>
+        <button data-i="1" onclick="setQuote(1)"></button>
+        <button data-i="2" onclick="setQuote(2)"></button>
+        <button class="arrow" onclick="shiftQuote(1)">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="donate" id="donate">
+  <div class="wrap">
+    <div class="donate-card">
+      <div class="heart"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.8-10-9.3C.4 8.4 2 4.5 5.7 4c2-.3 3.9.6 5 2.2C11.9 4.6 13.8 3.7 15.7 4c3.7.5 5.3 4.4 3.7 7.7C19.5 16.2 12 21 12 21z"/></svg></div>
+      <h2 class="serif">Your generosity creates real change</h2>
+      <p>Choose an amount and give today. Every dollar goes directly toward programs that transform lives.</p>
+      <div class="amounts">
+        <button class="amount" onclick="selectAmount(this)">$25</button>
+        <button class="amount selected" onclick="selectAmount(this)">$50</button>
+        <button class="amount" onclick="selectAmount(this)">$100</button>
+        <button class="amount" onclick="selectAmount(this)">$250</button>
+      </div>
+      <div class="donate-actions">
+        <a href="#" class="donate-now">Donate Now</a>
+        <a href="#" class="donate-link">Set up monthly giving</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-about">
+        <div class="logo">
+          <div class="logo-mark" style="width:34px;height:34px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.8-10-9.3C.4 8.4 2 4.5 5.7 4c2-.3 3.9.6 5 2.2C11.9 4.6 13.8 3.7 15.7 4c3.7.5 5.3 4.4 3.7 7.7C19.5 16.2 12 21 12 21z"/></svg>
+          </div>
+          <span class="logo-name">Hopewell</span>
+        </div>
+        <p>Turning compassion into lasting change for communities around the world since 2009.</p>
+        <div class="socials">
+          <a href="#" class="social-btn" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>
+          <a href="#" class="social-btn" aria-label="X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.2l-5.6-6.8L4 22H1l8.1-9.3L1 2h7.3l5.1 6.2L18.9 2z"/></svg></a>
+          <a href="#" class="social-btn" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/></svg></a>
+          <a href="#" class="social-btn" aria-label="LinkedIn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2 3.77-2 4 0 4.8 2.6 4.8 6.1V21H17v-5.4c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21H9z"/></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Organization</h4>
+        <a href="#">Our Mission</a>
+        <a href="#">Projects</a>
+        <a href="#">Impact Reports</a>
+        <a href="#">Careers</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Get Involved</h4>
+        <a href="#">Donate</a>
+        <a href="#">Volunteer</a>
+        <a href="#">Fundraise</a>
+        <a href="#">Partnerships</a>
+      </div>
+
+      <div class="newsletter">
+        <h4>Stay connected</h4>
+        <p>Subscribe for stories of impact and ways to help.</p>
+        <div class="subscribe-row">
+          <input type="email" placeholder="you@email.com">
+          <button>Subscribe</button>
+        </div>
+        <div class="contact-line">✉️ hello@hopewell.org</div>
+        <div class="contact-line">📞 +1 (555) 012-3456</div>
+        <div class="contact-line">📍 120 Kindness Ave, Portland, OR</div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2026 Hopewell Foundation. All rights reserved.<br>
+      Registered Charity No. 1080999
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Donation amount selector
+  function selectAmount(btn){
+    document.querySelectorAll('.amount').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  // Testimonial carousel
+  const quotes = [
+    {
+      text: "Before the well was built, I walked three hours each day for water. Now my children go to school instead. Hopewell gave us back our time and our hope.",
+      name: "Amara Okafor",
+      role: "Mother of three, Clean Water Initiative"
+    },
+    {
+      text: "The farming program didn't just feed my family — it gave us a way to earn a living and plan for the future.",
+      name: "Diego Ramirez",
+      role: "Farmer, Nourish Communities"
+    },
+    {
+      text: "My daughter is the first in our family to read. That's what Hopewell's classrooms gave us.",
+      name: "Fatima Hassan",
+      role: "Parent, Educate a Child"
+    }
+  ];
+  let current = 0;
+  function renderQuote(){
+    document.getElementById('quoteText').textContent = quotes[current].text;
+    document.getElementById('quoteName').textContent = quotes[current].name;
+    document.getElementById('quoteRole').textContent = quotes[current].role;
+    document.querySelectorAll('.dots button[data-i]').forEach(b=>{
+      b.classList.toggle('active', Number(b.dataset.i) === current);
+    });
+  }
+  function setQuote(i){ current = i; renderQuote(); }
+  function shiftQuote(dir){
+    current = (current + dir + quotes.length) % quotes.length;
+    renderQuote();
+  }
+</script>
+
+</body>
+</html>
