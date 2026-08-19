@@ -1,0 +1,178 @@
+<!-- Qibla Compass Widget -->
+<div class="qibla-container">
+  <h3>কিবলা কম্পাস</h3>
+  <p id="qibla-status">লোকেশন অনুমতি চাওয়া হচ্ছে...</p>
+
+  <div class="compass-outer">
+    <div class="compass-dial" id="compassDial">
+      <div class="direction-mark n">N</div>
+      <div class="direction-mark e">E</div>
+      <div class="direction-mark s">S</div>
+      <div class="direction-mark w">W</div>
+      <!-- Kaaba Pointer -->
+      <div class="kaaba-pointer" id="kaabaPointer" title="কিবলার দিক">🕋</div>
+    </div>
+  </div>
+
+  <div class="qibla-info">
+    <p>কিবলার কোণ: <span id="qibla-degree">--</span>°</p>
+    <button onclick="initQiblaCompass()" class="reload-btn">দিক পুনরায় চিহ্নিত করুন</button>
+  </div>
+</div>
+
+<style>
+.qibla-container {
+  max-width: 320px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+  font-family: Arial, sans-serif;
+  border: 2px solid #0f5132;
+}
+
+.qibla-container h3 {
+  margin: 0 0 5px 0;
+  color: #0f5132;
+}
+
+#qibla-status {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.compass-outer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 15px auto;
+  border-radius: 50%;
+  border: 8px solid #0f5132;
+  background: #f8f9fa;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+.compass-dial {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transition: transform 0.2s ease-out;
+}
+
+.direction-mark {
+  position: absolute;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.n { top: 5px; left: 50%; transform: translateX(-50%); color: #dc3545; }
+.e { right: 8px; top: 50%; transform: translateY(-50%); }
+.s { bottom: 5px; left: 50%; transform: translateX(-50%); }
+.w { left: 8px; top: 50%; transform: translateY(-50%); }
+
+.kaaba-pointer {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+}
+
+.qibla-info p {
+  margin: 5px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.reload-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #0f5132;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.reload-btn:hover { background: #14532d; }
+</style>
+
+<script>
+let qiblaAngle = 0;
+
+// কাবার স্থানাঙ্ক (Latitude, Longitude)
+const KAABA_LAT = 21.422487;
+const KAABA_LNG = 39.826206;
+
+// ডিগ্রি থেকে রেডিয়ান রূপান্তর
+function toRad(deg) {
+  return deg * (Math.PI / 180);
+}
+
+// ইউজারের লোকেশন থেকে কাবার কোণ (Qibla Bearing) গণনা
+function calculateQibla(userLat, userLng) {
+  const uLat = toRad(userLat);
+  const kLat = toRad(KAABA_LAT);
+  const dLng = toRad(KAABA_LNG - userLng);
+
+  const y = Math.sin(dLng);
+  const x = Math.cos(uLat) * Math.tan(kLat) - Math.sin(uLat) * Math.cos(dLng);
+  
+  let qibla = Math.atan2(y, x) * (180 / Math.PI);
+  return (qibla + 360) % 360;
+}
+
+// ডিভাইস সেন্সর এবং লোকেশন লোড
+function initQiblaCompass() {
+  const statusEl = document.getElementById('qibla-status');
+  
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        qiblaAngle = calculateQibla(lat, lng);
+        document.getElementById('qibla-degree').innerText = Math.round(qiblaAngle);
+        statusEl.innerText = "লোকেশন শনাক্ত হয়েছে। ফোনটি সমতল রাখুন।";
+        
+        // কাবা আইকনকে সঠিক ডিগ্রিতে বসানো
+        document.getElementById('kaabaPointer').style.transform = 
+          `translateX(-50%) rotate(${qiblaAngle}deg)`;
+
+        // ডিভাইসের মোশন/ওরিয়েন্টেশন সেন্সর শোনা
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+        }
+      },
+      (error) => {
+        statusEl.innerText = "লোকেশন পারমিশন ছাড়া কিবলা নির্ধারণ সম্ভব নয়।";
+      }
+    );
+  } else {
+    statusEl.innerText = "আপনার ব্রাউজার জিওলোকেশন সাপোর্ট করে না।";
+  }
+}
+
+// ডিভাইস ঘুরলে কম্পাস ঘোরানো
+function handleOrientation(event) {
+  let heading = event.alpha; // ডিভাইসের কম্পাস হেডিং
+  if (event.webkitCompassHeading) {
+    heading = event.webkitCompassHeading; // iOS ডিভাইস
+  }
+
+  if (heading !== null && heading !== undefined) {
+    const dial = document.getElementById('compassDial');
+    dial.style.transform = `rotate(${-heading}deg)`;
+  }
+}
+
+// স্ক্রিপ্ট শুরু
+initQiblaCompass();
+</script>
