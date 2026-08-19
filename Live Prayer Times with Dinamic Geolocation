@@ -1,0 +1,152 @@
+<!-- Live Prayer Times Container with Dynamic Geolocation -->
+<div class="prayer-container">
+  <div class="prayer-header">
+    <h3>আজকের লাইভ নামাজের সময়সূচী</h3>
+    <p id="location-name">আপনার অবস্থান নির্ণয় করা হচ্ছে...</p>
+    <p id="current-date">তথ্য লোড হচ্ছে...</p>
+  </div>
+  
+  <div class="prayer-grid">
+    <div class="prayer-card"><span class="name">ফজর</span><span class="time" id="fajr">--:--</span></div>
+    <div class="prayer-card"><span class="name">সূর্যোদয়</span><span class="time" id="sunrise">--:--</span></div>
+    <div class="prayer-card"><span class="name">জোহর</span><span class="time" id="dhuhr">--:--</span></div>
+    <div class="prayer-card"><span class="name">আসর</span><span class="time" id="asr">--:--</span></div>
+    <div class="prayer-card"><span class="name">মাগরিব</span><span class="time" id="maghrib">--:--</span></div>
+    <div class="prayer-card"><span class="name">ইশা</span><span class="time" id="isha">--:--</span></div>
+  </div>
+</div>
+
+<style>
+.prayer-container {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+}
+
+.prayer-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.prayer-header h3 {
+  margin: 0;
+  color: #0f5132;
+  font-size: 20px;
+}
+
+.prayer-header p {
+  margin: 3px 0;
+  color: #555;
+  font-size: 13px;
+}
+
+#location-name {
+  font-weight: bold;
+  color: #0f5132;
+}
+
+.prayer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prayer-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.prayer-card .name { color: #333; }
+.prayer-card .time { color: #0f5132; font-weight: bold; }
+</style>
+
+<script>
+// সময় ফরম্যাট ফাংশন (২৪ ঘণ্টা -> ১২ ঘণ্টা এবং বাংলায় সংখ্যা)
+function formatTo12Hour(time24) {
+  if (!time24) return "--:--";
+  let [hours, minutes] = time24.split(' ')[0].split(':');
+  hours = parseInt(hours);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  
+  const bnNums = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const formattedTime = `${hours}:${minutes}`.replace(/[0-9]/g, w => bnNums[w]);
+  
+  return `${formattedTime} ${ampm}`;
+}
+
+// Coordinate (Lat/Long) অনুযায়ী Aladhan API কল করার ফাংশন
+async function fetchByCoordinates(latitude, longitude, locationText) {
+  const method = 1; // University of Islamic Sciences, Karachi
+  const school = 1; // Hanafi
+
+  const url = `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=${method}&school=${school}`;
+
+  try {
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (result.code === 200) {
+      const timings = result.data.timings;
+      const dateInfo = result.data.date;
+
+      document.getElementById('location-name').innerText = locationText;
+      document.getElementById('current-date').innerText = 
+        `${dateInfo.readable} | ${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year} AH`;
+
+      document.getElementById('fajr').innerText = formatTo12Hour(timings.Fajr);
+      document.getElementById('sunrise').innerText = formatTo12Hour(timings.Sunrise);
+      document.getElementById('dhuhr').innerText = formatTo12Hour(timings.Dhuhr);
+      document.getElementById('asr').innerText = formatTo12Hour(timings.Asr);
+      document.getElementById('maghrib').innerText = formatTo12Hour(timings.Maghrib);
+      document.getElementById('isha').innerText = formatTo12Hour(timings.Isha);
+    } else {
+      document.getElementById('location-name').innerText = "তথ্য লোড করতে ব্যর্থ হয়েছে";
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById('location-name').innerText = "নেটওয়ার্ক সমস্যা";
+  }
+}
+
+// ডিফল্ট শহর (ঢাকা) ব্যাকআপ ফাংশন
+function fetchDefaultCity() {
+  // ঢাকার Latitude: 23.8103, Longitude: 90.4125
+  fetchByCoordinates(23.8103, 90.4125, "ঢাকা, বাংলাদেশ (ডিফল্ট)");
+}
+
+// ইউজার লোকেশন শনাক্তকরণ শুরু
+function getUserLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        fetchByCoordinates(lat, lon, "আপনার বর্তমান অবস্থান অনুযায়ী");
+      },
+      (error) => {
+        // ইউজার অনুমতি না দিলে বা কোনো ত্রুটি হলে
+        console.warn("Geolocation Denied/Failed, loading default city.");
+        fetchDefaultCity();
+      },
+      { timeout: 10000 } // ১০ সেকেন্ডে রেসপন্স না পেলে ডিফল্ট সিটিতে চলে যাবে
+    );
+  } else {
+    // ব্রাউজারে Geolocation সাপোর্ট না করলে
+    fetchDefaultCity();
+  }
+}
+
+// স্ক্রিপ্ট রান
+getUserLocation();
+</script>
