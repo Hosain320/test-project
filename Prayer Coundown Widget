@@ -1,0 +1,129 @@
+<!-- Prayer Countdown Widget -->
+<div class="countdown-container">
+  <div class="countdown-header">
+    <span class="next-title">পরবর্তী ওয়াক্ত: <strong id="next-prayer-name">লোডিং...</strong></span>
+    <div id="countdown-timer" class="timer-display">00:00:00</div>
+  </div>
+</div>
+
+<style>
+.countdown-container {
+  max-width: 420px;
+  margin: 15px auto;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #0f5132, #1b4332);
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.next-title {
+  font-size: 15px;
+  display: block;
+  margin-bottom: 5px;
+  color: #e0e0e0;
+}
+
+.next-title strong {
+  color: #ffda6a;
+  font-size: 17px;
+}
+
+.timer-display {
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 5px;
+}
+</style>
+
+<script>
+let prayerTimes = {};
+let countdownInterval = null;
+
+// সংখ্যা বাংলা করার ফাংশন
+function toBanglaNumber(n) {
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  return n.toString().replace(/[0-9]/g, w => bn[w]);
+}
+
+// Aladhan API থেকে সময় নেওয়া
+async function initCountdown() {
+  const url = `https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1&school=1`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.code === 200) {
+      const t = data.data.timings;
+      prayerTimes = {
+        'ফজর': t.Fajr,
+        'জোহর': t.Dhuhr,
+        'আসর': t.Asr,
+        'মাগরিব': t.Maghrib,
+        'ইশা': t.Isha
+      };
+      startTimer();
+    }
+  } catch (err) {
+    document.getElementById('next-prayer-name').innerText = "ত্রুটি ঘটেছে";
+  }
+}
+
+function startTimer() {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  countdownInterval = setInterval(() => {
+    const now = new Date();
+    let nextPrayerName = '';
+    let nextPrayerTime = null;
+
+    // ওয়াক্তগুলোর সময় আজকের ডেট অবজেক্টে কনভার্ট করা
+    for (let name in prayerTimes) {
+      const [hours, minutes] = prayerTimes[name].split(':');
+      const pTime = new Date();
+      pTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      if (pTime > now) {
+        nextPrayerName = name;
+        nextPrayerTime = pTime;
+        break;
+      }
+    }
+
+    // ইশার পর হলে পরবর্তী দিনের ফজর সেট করা
+    if (!nextPrayerTime) {
+      nextPrayerName = 'ফজর (আগামীকাল)';
+      const [hours, minutes] = prayerTimes['ফজর'].split(':');
+      nextPrayerTime = new Date();
+      nextPrayerTime.setDate(nextPrayerTime.getDate() + 1);
+      nextPrayerTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    }
+
+    // সময় গণনা
+    const diff = nextPrayerTime - now;
+    const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((diff / (1000 * 60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+
+    // দুই ডিজিটে রূপান্তর (যেমন: 05)
+    const hStr = hrs < 10 ? '0' + hrs : hrs;
+    const mStr = mins < 10 ? '0' + mins : mins;
+    const sStr = secs < 10 ? '0' + secs : secs;
+
+    // DOM আপডেট
+    document.getElementById('next-prayer-name').innerText = nextPrayerName;
+    document.getElementById('countdown-timer').innerText = 
+      `${toBanglaNumber(hStr)} ঘণ্টা ${toBanglaNumber(mStr)} মিনিট ${toBanglaNumber(sStr)} সেকেন্ড`;
+  }, 1000);
+}
+
+// রান স্ক্রিপ্ট
+initCountdown();
+</script>
