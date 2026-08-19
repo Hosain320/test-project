@@ -1,0 +1,260 @@
+<!-- Inheritance Calculator Container -->
+<div class="farayez-container">
+  <h3>ইসলামিক ফারায়েজ ক্যালকুলেটর</h3>
+  <p class="subtitle">মৃত ব্যক্তির সম্পদ ও ওয়ারিশদের তথ্য দিয়ে বন্টন দেখুন</p>
+
+  <form id="farayezForm">
+    <div class="form-group">
+      <label>মোট সম্পত্তির পরিমাণ (টাকা/শতাংশ/বিঘা):</label>
+      <input type="number" id="totalAsset" placeholder="যেমন: ১০০০০০" min="0" required>
+    </div>
+
+    <div class="form-group">
+      <label>মৃত ব্যক্তি কে ছিলেন?</label>
+      <select id="deceasedGender" onchange="toggleSpouseInput()">
+        <option value="male">পুরুষ (স্বামী)</option>
+        <option value="female">নারী (স্ত্রী)</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="spouseGroup">
+      <label id="spouseLabel">স্ত্রীর সংখ্যা:</label>
+      <input type="number" id="spouseCount" value="1" min="0" max="4">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group half">
+        <label>ছেলে (জন):</label>
+        <input type="number" id="sonsCount" value="0" min="0">
+      </div>
+      <div class="form-group half">
+        <label>মেয়ে (জন):</label>
+        <input type="number" id="daughtersCount" value="0" min="0">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group half">
+        <label>বাবা জীবিত?</label>
+        <select id="hasFather">
+          <option value="yes">হ্যাঁ</option>
+          <option value="no" selected>না</option>
+        </select>
+      </div>
+      <div class="form-group half">
+        <label>মা জীবিত?</label>
+        <select id="hasMother">
+          <option value="yes">হ্যাঁ</option>
+          <option value="no" selected>না</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="button" onclick="calculateFarayez()" class="calc-btn">সম্পত্তি বন্টন করুন</button>
+  </form>
+
+  <div id="resultBox" class="result-box" style="display: none;">
+    <h4>বন্টনের ফলাফল:</h4>
+    <div id="resultDetails"></div>
+  </div>
+</div>
+
+<style>
+.farayez-container {
+  max-width: 450px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+}
+
+.farayez-container h3 {
+  margin: 0 0 5px 0;
+  color: #0f5132;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.half {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.calc-btn {
+  width: 100%;
+  padding: 10px;
+  background: #0f5132;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.calc-btn:hover {
+  background: #14532d;
+}
+
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+}
+
+.result-box h4 {
+  margin: 0 0 10px 0;
+  color: #0f5132;
+  border-bottom: 1px solid #bbf7d0;
+  padding-bottom: 5px;
+}
+
+.res-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 13px;
+}
+
+.res-item:last-child {
+  border-bottom: none;
+}
+</style>
+
+<script>
+function toggleSpouseInput() {
+  const gender = document.getElementById('deceasedGender').value;
+  const label = document.getElementById('spouseLabel');
+  const input = document.getElementById('spouseCount');
+  
+  if (gender === 'male') {
+    label.innerText = 'স্ত্রীর সংখ্যা:';
+    input.max = 4;
+    input.value = 1;
+  } else {
+    label.innerText = 'স্বামী জীবিত? (১ = হ্যাঁ, ০ = না):';
+    input.max = 1;
+    input.value = 1;
+  }
+}
+
+function calculateFarayez() {
+  const totalAsset = parseFloat(document.getElementById('totalAsset').value) || 0;
+  const gender = document.getElementById('deceasedGender').value;
+  const spouseCount = parseInt(document.getElementById('spouseCount').value) || 0;
+  const sons = parseInt(document.getElementById('sonsCount').value) || 0;
+  const daughters = parseInt(document.getElementById('daughtersCount').value) || 0;
+  const hasFather = document.getElementById('hasFather').value === 'yes';
+  const hasMother = document.getElementById('hasMother').value === 'yes';
+
+  if (totalAsset <= 0) {
+    alert("অনুগ্রহ করে সঠিক সম্পত্তির পরিমাণ লিখুন।");
+    return;
+  }
+
+  let shares = {};
+  let totalFractionUsed = 0;
+  const hasChildren = (sons + daughters) > 0;
+
+  // ১. স্ত্রী / স্বামী
+  if (gender === 'male' && spouseCount > 0) {
+    const wifeShare = hasChildren ? (1/8) : (1/4);
+    shares['স্ত্রী (' + spouseCount + ' জন মোট)'] = wifeShare;
+    totalFractionUsed += wifeShare;
+  } else if (gender === 'female' && spouseCount > 0) {
+    const husbandShare = hasChildren ? (1/4) : (1/2);
+    shares['স্বামী'] = husbandShare;
+    totalFractionUsed += husbandShare;
+  }
+
+  // ২. বাবা
+  if (hasFather) {
+    const fatherShare = hasChildren ? (1/6) : 0; // সন্তান না থাকলে আসাবা হিসেবে অবশিষ্ট পাবে
+    if (hasChildren) {
+      shares['বাবা'] = fatherShare;
+      totalFractionUsed += fatherShare;
+    }
+  }
+
+  // ৩. মা
+  if (hasMother) {
+    const motherShare = hasChildren ? (1/6) : (1/3);
+    shares['মা'] = motherShare;
+    totalFractionUsed += motherShare;
+  }
+
+  // অবশিষ্ট অংশ (Asabah/Residuary)
+  let remainingFraction = 1 - totalFractionUsed;
+  if (remainingFraction < 0) remainingFraction = 0;
+
+  // ৪. সন্তান ও বাবা (অবশিষ্ট সম্পদ বন্টন)
+  if (hasChildren) {
+    const totalUnits = (sons * 2) + daughters; // ছেলে পাবে ২ অংশ, মেয়ে ১ অংশ
+    if (totalUnits > 0) {
+      const unitValue = remainingFraction / totalUnits;
+      if (sons > 0) {
+        shares['প্রত্যেক ছেলে (' + sons + ' জন)'] = (unitValue * 2);
+      }
+      if (daughters > 0) {
+        shares['প্রত্যেক মেয়ে (' + daughters + ' জন)'] = unitValue;
+      }
+    }
+  } else if (hasFather) {
+    // সন্তান না থাকলে বাবা অবশিষ্ট সবটুকু পাবেন
+    shares['বাবা'] = (shares['বাবা'] || 0) + remainingFraction;
+  }
+
+  // রেজাল্ট প্রস্তুতকরণ
+  let html = '';
+  for (let person in shares) {
+    const amount = (totalAsset * shares[person]).toFixed(2);
+    const percentage = (shares[person] * 100).toFixed(1);
+    html += `
+      <div class="res-item">
+        <span><strong>${person}:</strong> (${percentage}%)</span>
+        <span><strong>${amount}</strong></span>
+      </div>
+    `;
+  }
+
+  document.getElementById('resultDetails').innerHTML = html;
+  document.getElementById('resultBox').style.display = 'block';
+}
+</script>
