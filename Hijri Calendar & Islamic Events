@@ -1,0 +1,178 @@
+<!-- Hijri Calendar & Islamic Events Widget -->
+<div class="hijri-container">
+  <div class="hijri-header">
+    <h3>আজকের হিজরী তারিখ</h3>
+    <div id="today-hijri" class="today-date">তারিখ লোড হচ্ছে...</div>
+    <p id="today-gregorian" class="greg-date"></p>
+  </div>
+
+  <div class="events-section">
+    <h4>গুরুত্বপূর্ণ ইসলামিক দিনসমূহ</h4>
+    <div id="events-list" class="events-list">
+      <p style="text-align: center; color: #666;">ইভেন্ট লোড হচ্ছে...</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.hijri-container {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+}
+
+.hijri-header {
+  text-align: center;
+  background: #f0fdf4;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 20px;
+}
+
+.hijri-header h3 {
+  margin: 0 0 5px 0;
+  color: #0f5132;
+  font-size: 16px;
+}
+
+.today-date {
+  font-size: 20px;
+  font-weight: bold;
+  color: #14532d;
+  margin: 5px 0;
+}
+
+.greg-date {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.events-section h4 {
+  margin: 0 0 12px 0;
+  color: #0f5132;
+  font-size: 15px;
+  border-bottom: 2px solid #f0fdf4;
+  padding-bottom: 5px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-card {
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-left: 4px solid #0f5132;
+  border-radius: 4px;
+}
+
+.event-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.event-name {
+  font-weight: bold;
+  color: #111827;
+  font-size: 14px;
+}
+
+.event-date {
+  font-size: 11px;
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #334155;
+}
+
+.event-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+</style>
+
+<script>
+// সংখ্যা বাংলায় রূপান্তর
+function toBengali(str) {
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  return str.toString().replace(/[0-9]/g, w => bn[w]);
+}
+
+// আরবি মাসের নাম বাংলা
+const hijriMonthsBn = {
+  "Muḥarram": "মহররম", "Ṣafar": "সফর", "Rabīʿ al-awwal": "রবিউল আউয়াল",
+  "Rabīʿ al-thānī": "রবিউস সানি", "Jumādā al-ūlā": "জমাদিউল আউয়াল",
+  "Jumādā al-ākhirah": "জমাদিউস সানি", "Rajab": "রজব", "Shaʿbān": "শা'বান",
+  "Ramadān": "রমজান", "Shawwāl": "শাওয়াল", "Dhū al-Qaʿdah": "জিলকদ", "Dhū al-Ḥijjah": "জিলহজ"
+};
+
+// ইসলামিক ইভেন্ট তালিকা ও তাৎপর্য
+const islamicEvents = [
+  { day: 10, month: 1, name: "পবিত্র আশুরা", desc: "ঐতিহাসিক তাৎপর্যমণ্ডিত দিন এবং হযরত হোসাইন (রা:) এর শাহাদাত দিবস।" },
+  { day: 12, month: 3, name: "ঈদে মিলাদুন্নবী (সা:)", desc: "মহানবী হযরত মুহাম্মদ (সা:)-এর ধরাধেমে আগমন ও ওফাত দিবস।" },
+  { day: 27, month: 7, name: "শবে মেরাজ", desc: "রাসূলুল্লাহ (সা:)-এর উর্ধ্বারোহণ ও পাঁচ ওয়াক্ত নামাজ ফরজ হওয়ার রাত।" },
+  { day: 15, month: 8, name: "শবে বরাত", desc: "সৌভাগ্য ও ক্ষমা প্রার্থনার মহিমান্বিত রজনী।" },
+  { day: 1, month: 9, name: "প্রথম রমজান", desc: "পবিত্র সিয়াম সাধনার মাস সূচনা।" },
+  { day: 27, month: 9, name: "শবে কদর", desc: "হাজার মাসের চেয়ে শ্রেষ্ঠ রাত, আল-কুরআন নাজিলের রজনী।" },
+  { day: 1, month: 10, name: "ঈদুল ফিতর", desc: "দীর্ঘ এক মাস সিয়াম সাধনার পর মুসলিম উম্মাহর আনন্দের দিন।" },
+  { day: 9, month: 12, name: "আরাফার দিন", desc: "হজ্জের মূল দিন ও দোয়া কবুলের অন্যতম শ্রেষ্ঠ সময়।" },
+  { day: 10, month: 12, name: "ঈদুল আজহা", desc: "হযরত ইব্রাহিম (আ:)-এর ত্যাগের স্মরণে কুরবানির ঈদ।" }
+];
+
+async function loadHijriData() {
+  const url = `https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.code === 200) {
+      const hijri = data.data.date.hijri;
+      const greg = data.data.date.gregorian;
+
+      const monthName = hijriMonthsBn[hijri.month.en] || hijri.month.en;
+      
+      // আজকের হিজরী তারিখ দেখানো
+      document.getElementById('today-hijri').innerText = 
+        `${toBengali(hijri.day)} ${monthName}, ${toBengali(hijri.year)} হিজরী`;
+
+      document.getElementById('today-gregorian').innerText = 
+        `ইংরেজি: ${greg.day} ${greg.month.en} ${greg.year} খ্রিঃ`;
+
+      // ইভেন্ট তালিকা তৈরি
+      let eventsHTML = '';
+      islamicEvents.forEach(evt => {
+        const mName = hijriMonthsBn[Object.keys(hijriMonthsBn)[evt.month - 1]] || "";
+        eventsHTML += `
+          <div class="event-card">
+            <div class="event-title-wrap">
+              <span class="event-name">${evt.name}</span>
+              <span class="event-date">${toBengali(evt.day)} ${mName}</span>
+            </div>
+            <p class="event-desc">${evt.desc}</p>
+          </div>
+        `;
+      });
+
+      document.getElementById('events-list').innerHTML = eventsHTML;
+    }
+  } catch (err) {
+    document.getElementById('today-hijri').innerText = "তথ্য লোড করা যায়নি";
+  }
+}
+
+loadHijriData();
+</script>
