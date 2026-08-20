@@ -1,0 +1,99 @@
+<!-- Multi-Language Zakat Calculator -->
+<div class="zakat-container" id="zakatContainer">
+  <div class="lang-switcher">
+    <select id="zakLangSelect" onchange="updateZakLanguage()">
+      <option value="en" selected>English</option>
+      <option value="bn">বাংলা</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+
+  <h3 id="zak-title">Zakat Calculator</h3>
+
+  <div class="input-group">
+    <label id="lbl-cash">Cash & Bank Balance:</label>
+    <input type="number" id="cashInput" placeholder="0" oninput="calculateZakat()">
+  </div>
+  <div class="input-group">
+    <label id="lbl-gold">Gold & Silver Value:</label>
+    <input type="number" id="goldInput" placeholder="0" oninput="calculateZakat()">
+  </div>
+  <div class="input-group">
+    <label id="lbl-investment">Investments & Business Goods:</label>
+    <input type="number" id="invInput" placeholder="0" oninput="calculateZakat()">
+  </div>
+
+  <div class="zakat-result">
+    <span id="lbl-total">Total Payable Zakat (2.5%):</span>
+    <h2 id="zakatOutput">0</h2>
+  </div>
+</div>
+
+<style>
+.zakat-container {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+}
+.zakat-container.rtl { direction: rtl; text-align: right; }
+.lang-switcher { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.zakat-container h3 { margin: 0 0 15px 0; color: #0f5132; text-align: center; }
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #333; }
+.input-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+.zakat-result { margin-top: 15px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; text-align: center; }
+.zakat-result span { font-size: 12px; color: #166534; }
+.zakat-result h2 { margin: 5px 0 0 0; color: #0f5132; font-size: 24px; }
+</style>
+
+<script>
+const zakTranslations = {
+  en: { title: "Zakat Calculator", cash: "Cash & Bank Balance:", gold: "Gold & Silver Value:", inv: "Investments & Business Goods:", total: "Total Payable Zakat (2.5%):" },
+  bn: { title: "যাকাত ক্যালকুলেটর", cash: "নগদ টাকা ও ব্যাংক ব্যালেন্স:", gold: "সোনা ও রূপার বর্তমান মূল্য:", inv: "বিনিয়োগ ও ব্যবসার মালামাল:", total: "মোট প্রদেয় যাকাত (২.৫%):" },
+  ar: { title: "حاسبة الزكاة", cash: "النقد والأرصدة البنكية:", gold: "قيمة الذهب والفضة:", inv: "الاستثمارات والبضائع التجارية:", total: "إجمالي الزكاة الواجبة (٢.٥٪):" }
+};
+
+let rawZakatVal = 0;
+
+function toZakNumbers(num, lang) {
+  if (lang === 'en') return num;
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const ar = {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+  const dict = lang === 'bn' ? bn : ar;
+  return num.toString().replace(/[0-9]/g, w => dict[w] || w);
+}
+
+function updateZakLanguage() {
+  const lang = document.getElementById('zakLangSelect').value;
+  const container = document.getElementById('zakatContainer');
+  const t = zakTranslations[lang];
+
+  if (lang === 'ar') container.classList.add('rtl');
+  else container.classList.remove('rtl');
+
+  document.getElementById('zak-title').innerText = t.title;
+  document.getElementById('lbl-cash').innerText = t.cash;
+  document.getElementById('lbl-gold').innerText = t.gold;
+  document.getElementById('lbl-investment').innerText = t.inv;
+  document.getElementById('lbl-total').innerText = t.total;
+
+  document.getElementById('zakatOutput').innerText = toZakNumbers(rawZakatVal.toFixed(2), lang);
+}
+
+function calculateZakat() {
+  const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+  const gold = parseFloat(document.getElementById('goldInput').value) || 0;
+  const inv = parseFloat(document.getElementById('invInput').value) || 0;
+
+  const totalAssets = cash + gold + inv;
+  rawZakatVal = totalAssets * 0.025;
+
+  const lang = document.getElementById('zakLangSelect').value;
+  document.getElementById('zakatOutput').innerText = toZakNumbers(rawZakatVal.toFixed(2), lang);
+}
+</script>
