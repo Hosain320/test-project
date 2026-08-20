@@ -1,0 +1,118 @@
+<!-- Multi-Language Inheritance Calculator -->
+<div class="far-container" id="farContainer">
+  <div class="lang-switcher">
+    <select id="farLangSelect" onchange="updateFarLanguage()">
+      <option value="en" selected>English</option>
+      <option value="bn">বাংলা</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+
+  <h3 id="far-title">Inheritance Calculator</h3>
+
+  <div class="input-group">
+    <label id="lbl-asset">Total Asset Amount:</label>
+    <input type="number" id="farAsset" placeholder="0">
+  </div>
+  <div class="input-group">
+    <label id="lbl-deceased">Deceased Person:</label>
+    <select id="farGender">
+      <option value="male" id="opt-male">Male (Husband)</option>
+      <option value="female" id="opt-female">Female (Wife)</option>
+    </select>
+  </div>
+  <div class="input-group">
+    <label id="lbl-sons">Sons Count:</label>
+    <input type="number" id="farSons" value="0" min="0">
+  </div>
+  <div class="input-group">
+    <label id="lbl-daughters">Daughters Count:</label>
+    <input type="number" id="farDaughters" value="0" min="0">
+  </div>
+
+  <button class="calc-btn" id="far-btn" onclick="calcFarayez()">Calculate Share</button>
+
+  <div class="far-result" id="farResult" style="display:none;">
+    <h4 id="far-res-title">Distribution Result:</h4>
+    <div id="farDetails"></div>
+  </div>
+</div>
+
+<style>
+.far-container { max-width: 420px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: Arial, sans-serif; border-top: 4px solid #0f5132; }
+.far-container.rtl { direction: rtl; text-align: right; }
+.lang-switcher { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.far-container h3 { margin: 0 0 15px 0; color: #0f5132; text-align: center; }
+.input-group { margin-bottom: 10px; }
+.input-group label { display: block; font-size: 12px; margin-bottom: 3px; color: #333; }
+.input-group input, .input-group select { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+.calc-btn { width: 100%; padding: 10px; background: #0f5132; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.far-result { margin-top: 15px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; }
+.far-result h4 { margin: 0 0 8px 0; color: #0f5132; font-size: 14px; }
+.res-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed #cbd5e1; }
+</style>
+
+<script>
+const farTranslations = {
+  en: { title: "Inheritance Calculator", asset: "Total Asset Amount:", deceased: "Deceased Person:", male: "Male (Husband)", female: "Female (Wife)", sons: "Sons Count:", daughters: "Daughters Count:", btn: "Calculate Share", resTitle: "Distribution Result:", sonLabel: "Each Son", dauLabel: "Each Daughter", spouseLabel: "Spouse Share" },
+  bn: { title: "ফারায়েজ ক্যালকুলেটর", asset: "মোট সম্পত্তির পরিমাণ:", deceased: "মৃত ব্যক্তি কে ছিলেন:", male: "পুরুষ (স্বামী)", female: "নারী (স্ত্রী)", sons: "ছেলে (জন):", daughters: "মেয়ে (জন):", btn: "সম্পত্তি বন্টন করুন", resTitle: "বন্টনের ফলাফল:", sonLabel: "প্রত্যেক ছেলে", dauLabel: "প্রত্যেক মেয়ে", spouseLabel: "স্ত্রী/স্বামীর অংশ" },
+  ar: { title: "حاسبة المواريث", asset: "إجمالي قيمة التركة:", deceased: "المتوفى:", male: "رجل (زوج)", female: "امرأة (زوجة)", sons: "عدد البنين:", daughters: "عدد البنات:", btn: "احسب النصيب", resTitle: "نتيجة التوزيع:", sonLabel: "لكل ابن", dauLabel: "لكل بنت", spouseLabel: "نصيب الزوج/الزوجة" }
+};
+
+function toFarNumbers(num, lang) {
+  if (lang === 'en') return num;
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const ar = {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+  const dict = lang === 'bn' ? bn : ar;
+  return num.toString().replace(/[0-9]/g, w => dict[w] || w);
+}
+
+function updateFarLanguage() {
+  const lang = document.getElementById('farLangSelect').value;
+  const container = document.getElementById('farContainer');
+  const t = farTranslations[lang];
+
+  if (lang === 'ar') container.classList.add('rtl');
+  else container.classList.remove('rtl');
+
+  document.getElementById('far-title').innerText = t.title;
+  document.getElementById('lbl-asset').innerText = t.asset;
+  document.getElementById('lbl-deceased').innerText = t.deceased;
+  document.getElementById('opt-male').innerText = t.male;
+  document.getElementById('opt-female').innerText = t.female;
+  document.getElementById('lbl-sons').innerText = t.sons;
+  document.getElementById('lbl-daughters').innerText = t.daughters;
+  document.getElementById('far-btn').innerText = t.btn;
+  document.getElementById('far-res-title').innerText = t.resTitle;
+}
+
+function calcFarayez() {
+  const asset = parseFloat(document.getElementById('farAsset').value) || 0;
+  const gender = document.getElementById('farGender').value;
+  const sons = parseInt(document.getElementById('farSons').value) || 0;
+  const daughters = parseInt(document.getElementById('farDaughters').value) || 0;
+  const lang = document.getElementById('farLangSelect').value;
+  const t = farTranslations[lang];
+
+  if (asset <= 0) return;
+
+  const hasChildren = (sons + daughters) > 0;
+  let spouseShare = 0;
+
+  if (gender === 'male') spouseShare = hasChildren ? (1/8) : (1/4);
+  else spouseShare = hasChildren ? (1/4) : (1/2);
+
+  let rem = 1 - spouseShare;
+  let html = `<div class="res-row"><span>${t.spouseLabel}:</span> <span><strong>${toFarNumbers((asset * spouseShare).toFixed(2), lang)}</strong></span></div>`;
+
+  if (hasChildren) {
+    const totalUnits = (sons * 2) + daughters;
+    const unitVal = rem / totalUnits;
+    if (sons > 0) html += `<div class="res-row"><span>${t.sonLabel}:</span> <span><strong>${toFarNumbers((asset * unitVal * 2).toFixed(2), lang)}</strong></span></div>`;
+    if (daughters > 0) html += `<div class="res-row"><span>${t.dauLabel}:</span> <span><strong>${toFarNumbers((asset * unitVal).toFixed(2), lang)}</strong></span></div>`;
+  }
+
+  document.getElementById('farDetails').innerHTML = html;
+  document.getElementById('farResult').style.display = 'block';
+}
+</script>
