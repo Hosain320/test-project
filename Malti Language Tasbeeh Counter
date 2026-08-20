@@ -1,0 +1,92 @@
+<!-- Multi-Language Tasbeeh Counter -->
+<div class="tasbeeh-container" id="tasbeehContainer">
+  <div class="lang-switcher">
+    <select id="tasLangSelect" onchange="updateTasLanguage()">
+      <option value="en" selected>English</option>
+      <option value="bn">বাংলা</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+
+  <h3 id="tas-title">Digital Tasbeeh</h3>
+  
+  <select id="tasPhraseSelect" class="phrase-select">
+    <option value="1">SubhanAllah (سبحان الله)</option>
+    <option value="2">Alhamdulillah (الحمد لله)</option>
+    <option value="3">Allahu Akbar (الله أكبر)</option>
+  </select>
+
+  <div class="count-display" id="tasCount">0</div>
+
+  <div class="btn-group">
+    <button class="count-btn" onclick="addCount()" id="btn-count">COUNT</button>
+    <button class="reset-btn" onclick="resetCount()" id="btn-reset">Reset</button>
+  </div>
+</div>
+
+<style>
+.tasbeeh-container {
+  max-width: 350px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+  text-align: center;
+}
+.tasbeeh-container.rtl { direction: rtl; }
+.lang-switcher { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.tasbeeh-container h3 { margin: 0 0 15px 0; color: #0f5132; }
+.phrase-select { width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
+.count-display { font-size: 48px; font-weight: bold; color: #14532d; background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 15px; }
+.btn-group { display: flex; gap: 10px; }
+.count-btn { flex: 2; padding: 12px; background: #0f5132; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.reset-btn { flex: 1; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+</style>
+
+<script>
+const tasTranslations = {
+  en: { title: "Digital Tasbeeh", countBtn: "COUNT", resetBtn: "Reset" },
+  bn: { title: "ডিজিটাল তাসবিহ", countBtn: "গণনা করুন", resetBtn: "রিসেট" },
+  ar: { title: "المسبحة الإلكترونية", countBtn: "تسبيح", resetBtn: "إعادة ضبط" }
+};
+
+let count = 0;
+
+function toTasNumbers(num, lang) {
+  if (lang === 'en') return num;
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const ar = {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+  const dict = lang === 'bn' ? bn : ar;
+  return num.toString().replace(/[0-9]/g, w => dict[w] || w);
+}
+
+function updateTasLanguage() {
+  const lang = document.getElementById('tasLangSelect').value;
+  const container = document.getElementById('tasbeehContainer');
+  const t = tasTranslations[lang];
+
+  if (lang === 'ar') container.classList.add('rtl');
+  else container.classList.remove('rtl');
+
+  document.getElementById('tas-title').innerText = t.title;
+  document.getElementById('btn-count').innerText = t.countBtn;
+  document.getElementById('btn-reset').innerText = t.resetBtn;
+  document.getElementById('tasCount').innerText = toTasNumbers(count, lang);
+}
+
+function addCount() {
+  count++;
+  const lang = document.getElementById('tasLangSelect').value;
+  document.getElementById('tasCount').innerText = toTasNumbers(count, lang);
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
+function resetCount() {
+  count = 0;
+  const lang = document.getElementById('tasLangSelect').value;
+  document.getElementById('tasCount').innerText = toTasNumbers(0, lang);
+}
+</script>
