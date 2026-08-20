@@ -1,0 +1,139 @@
+<!-- Multi-Language Prayer Countdown Widget -->
+<div class="cd-container" id="cdContainer">
+  <div class="lang-switcher">
+    <select id="cdLangSelect" onchange="updateCdLanguage()">
+      <option value="en" selected>English</option>
+      <option value="bn">বাংলা</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+  
+  <div class="cd-header">
+    <h3 id="cd-title">Next Prayer In</h3>
+    <div class="next-prayer-name" id="next-prayer-display">--</div>
+  </div>
+
+  <div class="timer-display">
+    <div class="time-block"><span id="cd-hours">00</span><small id="cd-label-hr">Hours</small></div>
+    <div class="time-colon">:</div>
+    <div class="time-block"><span id="cd-mins">00</span><small id="cd-label-min">Mins</small></div>
+    <div class="time-colon">:</div>
+    <div class="time-block"><span id="cd-secs">00</span><small id="cd-label-sec">Secs</small></div>
+  </div>
+</div>
+
+<style>
+.cd-container {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+  text-align: center;
+}
+.cd-container.rtl { direction: rtl; }
+.lang-switcher { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.cd-header h3 { margin: 0; color: #555; font-size: 15px; }
+.next-prayer-name { font-size: 22px; font-weight: bold; color: #0f5132; margin: 5px 0 15px 0; }
+.timer-display { display: flex; justify-content: center; align-items: center; gap: 10px; }
+.time-block { background: #f0fdf4; padding: 10px 15px; border-radius: 8px; border: 1px solid #bbf7d0; min-width: 50px; }
+.time-block span { display: block; font-size: 24px; font-weight: bold; color: #14532d; }
+.time-block small { font-size: 10px; color: #666; }
+.time-colon { font-size: 24px; font-weight: bold; color: #0f5132; }
+</style>
+
+<script>
+const cdTranslations = {
+  en: { title: "Next Prayer In", hr: "Hours", min: "Mins", sec: "Secs", prayers: { Fajr: "Fajr", Dhuhr: "Dhuhr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Isha" } },
+  bn: { title: "পরবর্তী নামাজের বাকি", hr: "ঘণ্টা", min: "মিষ্টি", sec: "সেকেন্ড", prayers: { Fajr: "ফজর", Dhuhr: "জোহর", Asr: "আসর", Maghrib: "মাগরিব", Isha: "ইশা" } },
+  ar: { title: "الصلاة القادمة خلال", hr: "ساعة", min: "دقيقة", sec: "ثانية", prayers: { Fajr: "الفجر", Dhuhr: "الظهر", Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء" } }
+};
+
+let rawTimings = null;
+let targetTime = null;
+let currentPrayerKey = "";
+
+function toCdNumbers(str, lang) {
+  if (lang === 'en') return str;
+  const bn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const ar = {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+  const dict = lang === 'bn' ? bn : ar;
+  return str.toString().replace(/[0-9]/g, w => dict[w] || w);
+}
+
+function updateCdLanguage() {
+  const lang = document.getElementById('cdLangSelect').value;
+  const container = document.getElementById('cdContainer');
+  const t = cdTranslations[lang];
+
+  if (lang === 'ar') container.classList.add('rtl');
+  else container.classList.remove('rtl');
+
+  document.getElementById('cd-title').innerText = t.title;
+  document.getElementById('cd-label-hr').innerText = t.hr;
+  document.getElementById('cd-label-min').innerText = t.min;
+  document.getElementById('cd-label-sec').innerText = t.sec;
+
+  if (currentPrayerKey) {
+    document.getElementById('next-prayer-display').innerText = t.prayers[currentPrayerKey] || currentPrayerKey;
+  }
+}
+
+async function initCountdown() {
+  const url = `https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.code === 200) {
+      rawTimings = data.data.timings;
+      findNextPrayer();
+      setInterval(updateTimer, 1000);
+    }
+  } catch (err) {}
+}
+
+function findNextPrayer() {
+  const now = new Date();
+  const list = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  
+  for (let name of list) {
+    const [h, m] = rawTimings[name].split(':');
+    const pTime = new Date();
+    pTime.setHours(parseInt(h), parseInt(m), 0);
+    if (pTime > now) {
+      targetTime = pTime;
+      currentPrayerKey = name;
+      break;
+    }
+  }
+  if (!targetTime) {
+    const [h, m] = rawTimings['Fajr'].split(':');
+    targetTime = new Date();
+    targetTime.setDate(targetTime.getDate() + 1);
+    targetTime.setHours(parseInt(h), parseInt(m), 0);
+    currentPrayerKey = 'Fajr';
+  }
+  updateCdLanguage();
+}
+
+function updateTimer() {
+  if (!targetTime) return;
+  const lang = document.getElementById('cdLangSelect').value;
+  const diff = targetTime - new Date();
+
+  if (diff <= 0) { findNextPrayer(); return; }
+
+  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const m = Math.floor((diff / (1000 * 60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  document.getElementById('cd-hours').innerText = toCdNumbers(h < 10 ? '0' + h : h, lang);
+  document.getElementById('cd-mins').innerText = toCdNumbers(m < 10 ? '0' + m : m, lang);
+  document.getElementById('cd-secs').innerText = toCdNumbers(s < 10 ? '0' + s : s, lang);
+}
+
+initCountdown();
+</script>
