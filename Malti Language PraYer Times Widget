@@ -1,0 +1,223 @@
+<!-- Multi-Language Prayer Times Widget -->
+<div class="prayer-container" id="prayerContainer">
+  
+  <!-- Language Selector Dropdown -->
+  <div class="lang-switcher">
+    <label for="langSelect" id="langLabel">Language:</label>
+    <select id="langSelect" onchange="changeLanguage()">
+      <option value="en" selected>English</option>
+      <option value="bn">বাংলা</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+
+  <div class="prayer-header">
+    <h3 id="ui-title">Today's Prayer Times</h3>
+    <p id="ui-location">Dhaka, Bangladesh</p>
+    <p id="ui-date">Loading date...</p>
+  </div>
+  
+  <div class="prayer-grid">
+    <div class="prayer-card"><span class="name" id="label-fajr">Fajr</span><span class="time" id="fajr">--:--</span></div>
+    <div class="prayer-card"><span class="name" id="label-sunrise">Sunrise</span><span class="time" id="sunrise">--:--</span></div>
+    <div class="prayer-card"><span class="name" id="label-dhuhr">Dhuhr</span><span class="time" id="dhuhr">--:--</span></div>
+    <div class="prayer-card"><span class="name" id="label-asr">Asr</span><span class="time" id="asr">--:--</span></div>
+    <div class="prayer-card"><span class="name" id="label-maghrib">Maghrib</span><span class="time" id="maghrib">--:--</span></div>
+    <div class="prayer-card"><span class="name" id="label-isha">Isha</span><span class="time" id="isha">--:--</span></div>
+  </div>
+</div>
+
+<style>
+.prayer-container {
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  border-top: 4px solid #0f5132;
+}
+
+/* RTL Layout for Arabic */
+.prayer-container.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.lang-switcher {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+.lang-switcher select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  outline: none;
+  cursor: pointer;
+}
+
+.prayer-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.prayer-header h3 {
+  margin: 0;
+  color: #0f5132;
+  font-size: 20px;
+}
+
+.prayer-header p {
+  margin: 3px 0;
+  color: #555;
+  font-size: 13px;
+}
+
+.prayer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prayer-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.prayer-card .name { color: #333; }
+.prayer-card .time { color: #0f5132; font-weight: bold; }
+</style>
+
+<script>
+// ভাষাভিত্তিক ডিকশনারি (Dictionary)
+const translations = {
+  en: {
+    langLabel: "Language:",
+    title: "Today's Prayer Times",
+    location: "Dhaka, Bangladesh",
+    fajr: "Fajr",
+    sunrise: "Sunrise",
+    dhuhr: "Dhuhr",
+    asr: "Asr",
+    maghrib: "Maghrib",
+    isha: "Isha"
+  },
+  bn: {
+    langLabel: "ভাষা:",
+    title: "আজকের নামাজের সময়সূচী",
+    location: "ঢাকা, বাংলাদেশ",
+    fajr: "ফজর",
+    sunrise: "সূর্যোদয়",
+    dhuhr: "জোহর",
+    asr: "আসর",
+    maghrib: "মাগরিব",
+    isha: "ইশা"
+  },
+  ar: {
+    langLabel: "اللغة:",
+    title: "مواقيت الصلاة اليوم",
+    location: "دكا، بنغلاديش",
+    fajr: "الفجر",
+    sunrise: "الشروق",
+    dhuhr: "الظهر",
+    asr: "العصر",
+    maghrib: "المغرب",
+    isha: "العشاء"
+  }
+};
+
+let rawApiTimings = null;
+let rawApiDate = null;
+
+// সংখ্যা রূপান্তর ফাংশন
+function convertNumbers(str, lang) {
+  if (!str) return "--:--";
+  if (lang === 'en') return str;
+  
+  const bnNums = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  const arNums = {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+  
+  const dict = (lang === 'bn') ? bnNums : arNums;
+  return str.replace(/[0-9]/g, w => dict[w] || w);
+}
+
+// ২৪ ঘণ্টা থেকে ১২ ঘণ্টা ফরম্যাট
+function formatTime(time24, lang) {
+  if (!time24) return "--:--";
+  let [hours, minutes] = time24.split(' ')[0].split(':');
+  hours = parseInt(hours);
+  const ampm = hours >= 12 ? (lang==='bn'?'PM':(lang==='ar'?'م':'PM')) : (lang==='bn'?'AM':(lang==='ar'?'ص':'AM'));
+  hours = hours % 12 || 12;
+  
+  const timeStr = `${hours}:${minutes} ${ampm}`;
+  return convertNumbers(timeStr, lang);
+}
+
+// ভাষা পরিবর্তনের মূল ফাংশন
+function changeLanguage() {
+  const currentLang = document.getElementById('langSelect').value;
+  const container = document.getElementById('prayerContainer');
+  const t = translations[currentLang];
+
+  // RTL মোড সেটআপ
+  if (currentLang === 'ar') {
+    container.classList.add('rtl');
+  } else {
+    container.classList.remove('rtl');
+  }
+
+  // UI টেক্সট পরিবর্তন
+  document.getElementById('langLabel').innerText = t.langLabel;
+  document.getElementById('ui-title').innerText = t.title;
+  document.getElementById('ui-location').innerText = t.location;
+  document.getElementById('label-fajr').innerText = t.fajr;
+  document.getElementById('label-sunrise').innerText = t.sunrise;
+  document.getElementById('label-dhuhr').innerText = t.dhuhr;
+  document.getElementById('label-asr').innerText = t.asr;
+  document.getElementById('label-maghrib').innerText = t.maghrib;
+  document.getElementById('label-isha').innerText = t.isha;
+
+  // সময়গুলো পুনরায় আপডেট করা
+  if (rawApiTimings) {
+    document.getElementById('fajr').innerText = formatTime(rawApiTimings.Fajr, currentLang);
+    document.getElementById('sunrise').innerText = formatTime(rawApiTimings.Sunrise, currentLang);
+    document.getElementById('dhuhr').innerText = formatTime(rawApiTimings.Dhuhr, currentLang);
+    document.getElementById('asr').innerText = formatTime(rawApiTimings.Asr, currentLang);
+    document.getElementById('maghrib').innerText = formatTime(rawApiTimings.Maghrib, currentLang);
+    document.getElementById('isha').innerText = formatTime(rawApiTimings.Isha, currentLang);
+
+    const dateStr = `${rawApiDate.readable} | ${rawApiDate.hijri.day} ${rawApiDate.hijri.month.en} ${rawApiDate.hijri.year} AH`;
+    document.getElementById('ui-date').innerText = convertNumbers(dateStr, currentLang);
+  }
+}
+
+// Aladhan API থেকে ডাটা ফেচ
+async function fetchPrayerTimes() {
+  const url = `https://api.aladhan.com/v1/timingsByCity?city=Dhaka&country=Bangladesh&method=1&school=1`;
+
+  try {
+    const res = await fetch(url);
+    const result = await res.json();
+
+    if (result.code === 200) {
+      rawApiTimings = result.data.timings;
+      rawApiDate = result.data.date;
+      changeLanguage(); // ডিফল্ট ভাষা দিয়ে লোড হবে
+    }
+  } catch (err) {
+    document.getElementById('ui-date').innerText = "Error loading data";
+  }
+}
+
+fetchPrayerTimes();
+</script>
